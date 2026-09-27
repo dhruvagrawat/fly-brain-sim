@@ -67,6 +67,12 @@ def cmd_run(args):
     print(f"\nSaved {out/'rates.csv'} and {out/'spikes.parquet'}")
 
 
+def cmd_serve(args):
+    from .server import serve
+
+    serve(host=args.host, port=args.port, data_dir=args.data_dir, open_browser=not args.no_browser)
+
+
 def main(argv=None):
     from .data import DEFAULT_DATA_DIR
 
@@ -91,6 +97,12 @@ def main(argv=None):
     p.add_argument("--top", type=int, default=30)
     p.add_argument("--out", default="results/latest")
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("serve", help="start the web interface")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8050)
+    p.add_argument("--no-browser", action="store_true", help="don't open a browser tab")
+    p.set_defaults(func=cmd_serve)
 
     args = ap.parse_args(argv)
     args.func(args)

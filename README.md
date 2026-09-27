@@ -17,6 +17,22 @@ python -m flybrain run --stim sugar --rate 200 --trials 10
 
 Stimulating sugar-taste neurons activates ~400 neurons downstream, including the proboscis motor neuron MN9 (`720575940660219265`). That reproduces the feeding result from the paper.
 
+## Web interface
+
+```bash
+python -m flybrain serve          # opens http://127.0.0.1:8050
+```
+
+Pick neurons to stimulate or silence and press **Run simulation**. You get:
+
+- **Brain map**: all 138,639 neurons at their real 3D positions. Active neurons glow as the run replays spike by spike. Drag to rotate, scroll to zoom, switch to front/top/side views, or show mean firing rate instead of the replay.
+- **Brain output**: the descending and motor neurons that fired, i.e. the brain's commands to the body. Known behaviours (MN9 feeding, giant fiber escape, moonwalker backward walking, ...) are labelled.
+- **Population activity**: spikes per second over time for each neuron class.
+- **Spike raster** of the most active neurons.
+- **Neuron table** with cell type, class, side, transmitter and rate. Click any neuron to find it on the map, open it in FlyWire Codex, or add it to the next experiment.
+
+`docs/index.html` is a standalone copy with five recorded experiments baked in (sugar → feeding, forward walking, giant fiber escape, moonwalker, PPL1 dopamine). It opens in any browser with no install and can be served with GitHub Pages. Rebuild it with `python scripts/build_demo.py`.
+
 ### What you can stimulate or silence
 
 `--stim` and `--silence` each accept any mix of:

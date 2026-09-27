@@ -1,0 +1,863 @@
+<title>Flybrain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;600;700&family=Chivo+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#eef1f5; --panel:#ffffff; --panel-2:#f5f7fa; --line:#dde2ea; --line-strong:#c4ccd8;
+  --text:#121824; --text-2:#4b5566; --muted:#707a8c;
+  --accent:#c2410c; --accent-ink:#ffffff; --accent-soft:#fde8dc;
+  --focus:#2563eb;
+  --scope:#070a10; --scope-line:#1b2230; --scope-text:#c9d2e0; --scope-muted:#7a869a;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948; --s-other:#8b93a1;
+  --danger:#b42318;
+  --sans:"Chivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"Chivo Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0b0e14; --panel:#121722; --panel-2:#171d2a; --line:#232b3a; --line-strong:#334055;
+    --text:#e3e8f1; --text-2:#aab4c5; --muted:#7f8a9e;
+    --accent:#f08a4b; --accent-ink:#1a0d05; --accent-soft:#3a2216;
+    --focus:#7aa7ff;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s-other:#6f7888;
+    --danger:#ff7a6b;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0b0e14; --panel:#121722; --panel-2:#171d2a; --line:#232b3a; --line-strong:#334055;
+  --text:#e3e8f1; --text-2:#aab4c5; --muted:#7f8a9e;
+  --accent:#f08a4b; --accent-ink:#1a0d05; --accent-soft:#3a2216;
+  --focus:#7aa7ff;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s-other:#6f7888;
+  --danger:#ff7a6b;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--text);font:14px/1.45 var(--sans);padding-inline:16px;padding-block:0 32px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1440px;margin:0 auto}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;padding-block:18px 14px}
+.brand{font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0}
+.brand span{color:var(--accent)}
+.dataset{color:var(--muted);font-size:13px}
+.mode-pill{margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong);color:var(--text-2)}
+.mode-pill.live{border-color:var(--s3);color:var(--s3)}
+
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0}
+
+/* controls */
+.controls{padding:16px;display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line-strong);background:var(--panel-2);border-radius:999px;padding:3px 10px;font-size:12.5px;cursor:pointer;line-height:1.5}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.tokens{display:flex;flex-wrap:wrap;gap:6px;min-height:28px;padding:6px;border:1px dashed var(--line-strong);border-radius:8px}
+.tokens:empty::before{content:attr(data-empty);color:var(--muted);font-size:12.5px;padding:2px 4px}
+.token{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:2px 4px 2px 8px;font-size:12.5px}
+.token button{border:0;background:none;cursor:pointer;color:var(--muted);padding:0 4px;font-size:14px;line-height:1}
+.token button:hover{color:var(--danger)}
+.addrow{display:flex;gap:6px}
+.addrow input{flex:1;min-width:0}
+input[type=text],input[type=number],select{background:var(--panel-2);border:1px solid var(--line-strong);border-radius:7px;padding:6px 9px;font-size:13px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.btn{border:1px solid var(--line-strong);background:var(--panel-2);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--text-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;padding:10px 14px;font-size:14px}
+.btn.primary:disabled{opacity:.5;cursor:not-allowed}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2 label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-2)}
+.progress{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.status{font-size:12.5px;color:var(--text-2);min-height:1.4em}
+.status.err{color:var(--danger)}
+.note{font-size:12.5px;color:var(--text-2);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.note code{font-family:var(--mono);font-size:12px}
+.demo-list{display:flex;flex-direction:column;gap:6px}
+.demo-item{text-align:left;border:1px solid var(--line);background:var(--panel-2);border-radius:8px;padding:8px 10px;cursor:pointer}
+.demo-item b{display:block;font-weight:600;font-size:13px}
+.demo-item span{font-size:12px;color:var(--muted)}
+.demo-item[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+
+/* viewer */
+.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.run-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;padding:14px 16px 0}
+.run-title{font-size:17px;font-weight:600;margin:0;text-wrap:balance}
+.stats{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--text-2)}
+.stats b{color:var(--text);font-weight:600}
+.scope-wrap{position:relative;margin:12px 16px 0;border-radius:8px;overflow:hidden;background:var(--scope);aspect-ratio:16/9;max-width:100%}
+@media (max-width:600px){.scope-wrap{aspect-ratio:4/3}}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
+#map.dragging{cursor:grabbing}
+.scope-ui{position:absolute;display:flex;gap:4px;flex-wrap:wrap}
+.scope-ui.tl{top:10px;left:10px}
+.scope-ui.tr{top:10px;right:10px}
+.scope-ui.bl{bottom:10px;left:10px;right:10px;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.seg{display:inline-flex;border:1px solid var(--scope-line);border-radius:7px;overflow:hidden;background:rgba(7,10,16,.75)}
+.seg button{border:0;background:none;color:var(--scope-muted);padding:4px 10px;font-size:12px;cursor:pointer}
+.seg button[aria-pressed="true"]{color:#fff;background:#222b3b}
+.scope-note{font-size:11.5px;color:var(--scope-muted);font-family:var(--mono)}
+.lut{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--scope-muted);font-family:var(--mono)}
+.lut i{display:block;width:90px;height:6px;border-radius:3px;background:linear-gradient(90deg,#50127b,#b73779,#fc8961,#fcfdbf)}
+.clock{font-family:var(--mono);color:var(--text);font-size:13px;font-variant-numeric:tabular-nums}
+.tip{position:absolute;pointer-events:none;background:rgba(12,16,24,.94);color:#e6ebf3;border:1px solid #2b3446;border-radius:6px;padding:6px 8px;font-size:12px;line-height:1.35;max-width:240px;z-index:3}
+.tip small{color:#94a0b4;display:block}
+.playbar{display:flex;align-items:center;gap:10px;padding:10px 16px 14px;flex-wrap:wrap}
+.playbar input[type=range]{flex:1;min-width:140px}
+.play{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--panel-2);cursor:pointer;display:grid;place-items:center;flex:none}
+.play svg{width:14px;height:14px;fill:var(--text)}
+.playbar select{font-size:12px;padding:4px 6px}
+
+.info{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 16px 14px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);font-size:13px}
+.info .n{font-weight:600}
+.info .meta{color:var(--text-2)}
+.info .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.info a{color:var(--focus)}
+
+.cards{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}
+@media (max-width:1180px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h3{margin:0;font-size:14px;font-weight:600}
+.card .sub{font-size:12px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 6px}
+.legend button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:none;border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer;color:var(--text-2)}
+.legend button i{width:10px;height:3px;border-radius:2px;display:block}
+.legend button[aria-pressed="false"]{opacity:.45}
+.legend button[aria-pressed="false"] i{background:transparent!important;outline:1px solid var(--muted)}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:240px;overflow:visible}
+.chart .tip{background:var(--panel);color:var(--text);border-color:var(--line-strong);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.chart .tip small{color:var(--muted)}
+.tip .row{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.tip .row i{width:8px;height:8px;border-radius:2px;display:inline-block}
+#raster{display:block;width:100%;height:260px;cursor:crosshair}
+
+.outputs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.out{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel-2);cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.out:hover{border-color:var(--accent)}
+.out .nm{font-weight:600;font-size:13px}
+.out .bh{font-size:12px;color:var(--text-2)}
+.out .rt{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.out .bar{height:3px;background:var(--line);border-radius:2px;margin-top:4px;overflow:hidden}
+.out .bar i{display:block;height:100%;background:var(--accent)}
+.empty{color:var(--muted);font-size:13px}
+
+.tablecard{padding:14px 16px}
+.tablecard .card-head{margin-bottom:10px}
+.tscroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line-strong);white-space:nowrap}
+th.num,td.num{text-align:right}
+td{padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel-2)}
+tbody tr.sel{background:var(--accent-soft)}
+td .rbar{display:inline-block;width:70px;height:6px;background:var(--line);border-radius:3px;vertical-align:middle;margin-right:8px;overflow:hidden}
+td .rbar i{display:block;height:100%;background:var(--accent)}
+.tag{font-size:11px;border:1px solid var(--s2);color:var(--text-2);border-radius:4px;padding:0 5px;margin-left:6px}
+.more{margin-top:10px}
+footer{color:var(--muted);font-size:12px;margin-top:24px;max-width:900px}
+footer a{color:var(--text-2)}
+@media (prefers-reduced-motion: reduce){.progress i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">fly<span>brain</span></h1>
+    <div class="dataset" id="dataset">FlyWire connectome v783</div>
+    <div class="mode-pill" id="modePill">Loading</div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel controls" aria-label="Experiment setup">
+      <div class="field" id="demoField" hidden>
+        <p class="label">Recorded runs</p>
+        <div class="demo-list" id="demoList"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head"><p class="label">Stimulate</p><span class="sub mono" id="stimCount"></span></div>
+        <div class="chips" id="presetChips"></div>
+        <div class="tokens" id="stimTokens" data-empty="Pick a preset or add a cell type"></div>
+        <div class="addrow">
+          <input type="text" id="stimInput" list="typeList" placeholder="Cell type or FlyWire ID" autocomplete="off">
+          <button class="btn" id="stimAdd">Add</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <p class="label">Silence</p>
+        <div class="tokens" id="silTokens" data-empty="Nothing silenced"></div>
+        <div class="addrow">
+          <input type="text" id="silInput" list="typeList" placeholder="Cell type or FlyWire ID" autocomplete="off">
+          <button class="btn" id="silAdd">Add</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-head"><label class="label" for="rate">Stimulation rate</label><span class="mono" id="rateVal">200 Hz</span></div>
+        <input type="range" id="rate" min="10" max="400" step="10" value="200">
+      </div>
+
+      <div class="grid2">
+        <label for="trials">Trials<input type="number" id="trials" min="1" max="50" value="5"></label>
+        <label for="duration">Trial length
+          <select id="duration"><option value="250">250 ms</option><option value="500">500 ms</option><option value="1000" selected>1000 ms</option><option value="2000">2000 ms</option></select>
+        </label>
+      </div>
+
+      <div class="field">
+        <button class="btn primary" id="runBtn">Run simulation</button>
+        <div class="progress" aria-hidden="true"><i id="prog"></i></div>
+        <div class="status" id="status" role="status"></div>
+      </div>
+
+      <div class="note" id="localNote" hidden>
+        This page is showing recorded runs. To run your own experiments, start the live app on your computer:<br>
+        <code>python -m flybrain serve</code>
+      </div>
+    </aside>
+
+    <div class="main">
+      <section class="panel" aria-label="Brain activity">
+        <div class="run-head">
+          <h2 class="run-title" id="runTitle">No run loaded</h2>
+          <div class="stats" id="stats"></div>
+        </div>
+        <div class="scope-wrap" id="scope">
+          <canvas id="map" aria-label="3D map of all neurons; active neurons glow"></canvas>
+          <div class="scope-ui tl">
+            <div class="seg" id="viewSeg">
+              <button data-view="front" aria-pressed="true">Front</button>
+              <button data-view="top" aria-pressed="false">Top</button>
+              <button data-view="side" aria-pressed="false">Side</button>
+            </div>
+          </div>
+          <div class="scope-ui tr">
+            <div class="seg" id="modeSeg">
+              <button data-mode="replay" aria-pressed="true">Replay</button>
+              <button data-mode="mean" aria-pressed="false">Mean rate</button>
+            </div>
+          </div>
+          <div class="scope-ui bl">
+            <span class="scope-note" id="scopeNote">drag to rotate · scroll to zoom</span>
+            <span class="lut"><span id="lutLo">low</span><i></i><span id="lutHi">high</span></span>
+          </div>
+          <div class="tip" id="mapTip" hidden></div>
+        </div>
+        <div class="playbar">
+          <button class="play" id="playBtn" aria-label="Play"><svg viewBox="0 0 14 14" id="playIcon"><path d="M3 1.5v11l9-5.5z"/></svg></button>
+          <span class="clock" id="clock">0.0 ms</span>
+          <input type="range" id="scrub" min="0" max="1000" step="0.5" value="0" aria-label="Replay time">
+          <label class="sub" for="speed">Speed</label>
+          <select id="speed"><option value="0.02">1/50×</option><option value="0.05">1/20×</option><option value="0.1" selected>1/10×</option><option value="0.25">1/4×</option><option value="1">real time</option></select>
+        </div>
+        <div class="info" id="info" hidden></div>
+      </section>
+
+      <section class="panel card" aria-label="Brain output">
+        <div class="card-head">
+          <h3>Brain output</h3>
+          <span class="sub">Descending and motor neurons that fired: what the brain is telling the body</span>
+        </div>
+        <div class="outputs" id="outputs"></div>
+      </section>
+
+      <div class="cards">
+        <section class="panel card" aria-label="Population activity">
+          <div class="card-head">
+            <h3>Population activity</h3>
+            <span class="sub">Total spikes per second by neuron class, averaged over trials</span>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div class="chart" id="popChart"><svg id="popSvg" role="img" aria-label="Population firing rate over time"></svg><div class="tip" id="popTip" hidden></div></div>
+        </section>
+        <section class="panel card" aria-label="Spike raster">
+          <div class="card-head">
+            <h3>Spike raster</h3>
+            <span class="sub">Most active neurons, trial 1. Stimulated rows in orange.</span>
+          </div>
+          <div class="chart"><canvas id="raster"></canvas><div class="tip" id="rasTip" hidden></div></div>
+        </section>
+      </div>
+
+      <section class="panel tablecard" aria-label="Active neurons">
+        <div class="card-head">
+          <h3 id="tableTitle">Active neurons</h3>
+          <input type="text" id="filter" placeholder="Filter by name, class or ID" autocomplete="off" aria-label="Filter neurons">
+        </div>
+        <div class="tscroll">
+          <table>
+            <thead><tr><th class="num">#</th><th>Neuron</th><th>Class</th><th>Side</th><th>Transmitter</th><th class="num">Rate (Hz)</th><th class="num">± SD</th><th>FlyWire ID</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <button class="btn more" id="moreBtn" hidden>Show more</button>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    Leaky integrate-and-fire model of the whole adult fruit fly brain (Shiu et al., Nature 2024) on the FlyWire connectome
+    (Dorkenwald et al.; Schlegel et al., Nature 2024). Every neuron is placed at its real position in the brain.
+    Source: <a href="https://github.com/dhruvagrawat/fly-brain-sim" target="_blank" rel="noopener">github.com/dhruvagrawat/fly-brain-sim</a>
+  </footer>
+</div>
+<datalist id="typeList"></datalist>
+
+<script id="embed" type="application/json">__EMBED__</script>
+<script>
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const fmt = new Intl.NumberFormat("en-US");
+
+// ---------- data source ----------
+let EMBED = null;
+try { const t = $("#embed").textContent.trim(); if (t && t !== "__EMB" + "ED__") EMBED = JSON.parse(t); } catch (e) { EMBED = null; }
+const LIVE = !EMBED;
+
+function b64(s, T) {
+  const bin = atob(s), u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new T(u8.buffer);
+}
+
+// ---------- labels ----------
+const CLASS_LABEL = {optic:"Optic lobe", central:"Central brain", sensory:"Sensory", visual_projection:"Visual projection",
+  ascending:"Ascending", descending:"Descending", sensory_ascending:"Sensory ascending", visual_centrifugal:"Visual centrifugal",
+  motor:"Motor", endocrine:"Endocrine", "":"Unlabelled", unlabelled:"Unlabelled", stimulated:"Stimulated", other:"Other"};
+const SERIES = [ // fixed order + fixed colour per entity
+  ["stimulated","--s2"],["sensory","--s1"],["central","--s3"],["optic","--s6"],["visual_projection","--s4"],
+  ["ascending","--s7"],["descending","--s5"],["motor","--s8"],["other","--s-other"]];
+const SERIES_KEYS = SERIES.map(s => s[0]);
+const KNOWN = { // behaviour readouts
+  "720575940660219265": "MN9 · proboscis extension (feeding)",
+  DNp01: "Giant fiber · escape jump", MDN: "Moonwalker · backward walking", DNp09: "Forward walking",
+  DNa02: "Steering", DNa01: "Steering", DNg12_a:"Grooming", DNg12_b:"Grooming", DNp42:"Backward walking",
+  DNg14: "Proboscis / feeding", DNge172:"Feeding", aDN1:"Antennal grooming", DNg11:"Grooming", DNp10:"Escape / looming"
+};
+const nameOf = r => r[2] || ("…" + r[1].slice(-6));
+
+// ---------- state ----------
+const S = { geo:null, run:null, runs:[], presets:[], stim:[], sil:[], view:{yaw:0,pitch:0,zoom:1,panX:0,panY:0},
+  mode:"replay", t:0, playing:false, speed:0.1, selected:-1, hidden:new Set(["stimulated"]), rowsShown:25 };
+
+// ---------- geometry ----------
+function loadGeometry(g) {
+  const xyz = b64(g.xyz, Int16Array), cls = b64(g.cls, Uint8Array);
+  S.geo = { n:g.n, xyz, cls, classes:g.classes };
+  const dl = $("#typeList"); const frag = document.createDocumentFragment();
+  g.cell_types.slice(0, 9000).forEach(([t,c]) => { const o = document.createElement("option"); o.value = t; o.label = c + " neurons"; frag.appendChild(o); });
+  dl.appendChild(frag);
+}
+
+// ---------- map rendering ----------
+const map = $("#map"), mctx = map.getContext("2d");
+let W = 0, H = 0, DPR = 1, proj = null, baseCanvas = document.createElement("canvas"), sprites = [];
+const LUT_STOPS = [[0,[80,18,123]],[0.33,[183,55,121]],[0.66,[252,137,97]],[1,[252,253,191]]];
+function lut(x) {
+  x = Math.max(0, Math.min(1, x));
+  for (let k = 1; k < LUT_STOPS.length; k++) {
+    const [p1,c1] = LUT_STOPS[k], [p0,c0] = LUT_STOPS[k-1];
+    if (x <= p1) { const f = (x-p0)/(p1-p0); return c0.map((v,j) => Math.round(v + (c1[j]-v)*f)); }
+  }
+  return LUT_STOPS[LUT_STOPS.length-1][1];
+}
+function makeSprites() {
+  sprites = [];
+  const r = Math.round(7 * DPR);
+  for (let l = 0; l < 16; l++) {
+    const c = document.createElement("canvas"); c.width = c.height = 2*r;
+    const x = c.getContext("2d"), [R,G,B] = lut(l/15);
+    const gr = x.createRadialGradient(r,r,0,r,r,r);
+    gr.addColorStop(0, `rgba(${R},${G},${B},1)`); gr.addColorStop(0.18, `rgba(${R},${G},${B},.85)`);
+    gr.addColorStop(0.45, `rgba(${R},${G},${B},.22)`); gr.addColorStop(1, `rgba(${R},${G},${B},0)`);
+    x.fillStyle = gr; x.fillRect(0,0,2*r,2*r); sprites.push(c);
+  }
+}
+function resizeMap() {
+  const r = map.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = Math.max(1, Math.round(r.width * DPR)); H = Math.max(1, Math.round(r.height * DPR));
+  map.width = W; map.height = H; baseCanvas.width = W; baseCanvas.height = H;
+  makeSprites(); project(); drawBase(); render();
+}
+function project() {
+  if (!S.geo) return;
+  const {yaw,pitch,zoom,panX,panY} = S.view, n = S.geo.n, xyz = S.geo.xyz;
+  const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const s = Math.min(W/880, H/470) * zoom * 0.1; // xyz in 0.1 um units
+  if (!proj || proj.length !== 2*n) proj = new Float32Array(2*n);
+  const cx = W/2 + panX*DPR, cyy = H/2 + panY*DPR;
+  for (let i = 0; i < n; i++) {
+    const x = xyz[3*i], y = xyz[3*i+1], z = xyz[3*i+2];
+    const zz = -sy*x + cy*z;
+    proj[2*i] = cx + (cy*x + sy*z) * s;
+    proj[2*i+1] = cyy + (cp*y - sp*zz) * s;
+  }
+}
+function drawBase() {
+  if (!S.geo || !proj) return;
+  const n = S.geo.n, cls = S.geo.cls, dens = new Float32Array(W*H);
+  for (let i = 0; i < n; i++) {
+    if (cls[i] === 255) continue;
+    const x = proj[2*i] | 0, y = proj[2*i+1] | 0;
+    if (x >= 0 && y >= 0 && x < W && y < H) dens[y*W + x] += 1;
+  }
+  const bctx = baseCanvas.getContext("2d"), img = bctx.createImageData(W, H), d = img.data;
+  const k = 0.45 * DPR * DPR / Math.max(1, S.view.zoom);
+  for (let p = 0, q = 0; p < dens.length; p++, q += 4) {
+    const v = dens[p] ? 1 - Math.exp(-dens[p] * k) : 0;
+    d[q] = 7 + v*78; d[q+1] = 10 + v*98; d[q+2] = 16 + v*132; d[q+3] = 255;
+  }
+  bctx.putImageData(img, 0, 0);
+}
+
+// activity levels for the current frame
+let act = null, touched = [];
+function computeActivity() {
+  const run = S.run; if (!run) return [];
+  if (!act || act.length !== S.geo.n) act = new Float32Array(S.geo.n);
+  for (const i of touched) act[i] = 0;
+  touched = [];
+  if (S.mode === "mean") {
+    const ri = run.rateI, rr = run.rateR, lmax = Math.log1p(run.maxRate);
+    for (let k = 0; k < ri.length; k++) { const i = ri[k]; act[i] = Math.log1p(rr[k]) / lmax; touched.push(i); }
+    return touched;
+  }
+  const T = run.replayT, N = run.replayN, t10 = S.t * 10, tau = 15, win = 100;
+  let lo = lowerBound(T, t10 - win*10), hi = lowerBound(T, t10 + 1);
+  for (let k = lo; k < hi; k++) {
+    const i = N[k], a = Math.exp(-(t10 - T[k]) / (tau*10));
+    if (act[i] === 0) touched.push(i);
+    act[i] += a;
+  }
+  for (const i of touched) act[i] = Math.min(1, act[i] / 2.2);
+  return touched;
+}
+function lowerBound(a, v) { let lo = 0, hi = a.length; while (lo < hi) { const m = (lo+hi) >> 1; if (a[m] < v) lo = m+1; else hi = m; } return lo; }
+
+function render() {
+  if (!W) return;
+  mctx.globalCompositeOperation = "source-over"; mctx.globalAlpha = 1;
+  mctx.drawImage(baseCanvas, 0, 0);
+  if (!S.run || !proj) return;
+  const list = computeActivity(), r = sprites[0].width / 2;
+  mctx.globalCompositeOperation = "lighter";
+  for (const i of list) {
+    const a = act[i]; if (a < 0.02) continue;
+    const sp = sprites[Math.min(15, Math.round(a*15))], sz = r * (0.55 + 0.75*a);
+    mctx.globalAlpha = 0.35 + 0.65*a;
+    mctx.drawImage(sp, proj[2*i]-sz, proj[2*i+1]-sz, 2*sz, 2*sz);
+  }
+  mctx.globalCompositeOperation = "source-over"; mctx.globalAlpha = 1;
+  // stimulated neurons: small rings
+  if (S.run.stim.length <= 400) {
+    mctx.strokeStyle = "rgba(240,138,75,.9)"; mctx.lineWidth = 1*DPR;
+    for (const i of S.run.stim) { mctx.beginPath(); mctx.arc(proj[2*i], proj[2*i+1], 4*DPR, 0, 6.2832); mctx.stroke(); }
+  }
+  if (S.run.silence.length <= 400) {
+    mctx.strokeStyle = "rgba(122,167,255,.95)"; mctx.lineWidth = 1*DPR;
+    for (const i of S.run.silence) { const x = proj[2*i], y = proj[2*i+1], d = 3.5*DPR; mctx.beginPath(); mctx.moveTo(x-d,y-d); mctx.lineTo(x+d,y+d); mctx.moveTo(x+d,y-d); mctx.lineTo(x-d,y+d); mctx.stroke(); }
+  }
+  if (S.selected >= 0) {
+    const x = proj[2*S.selected], y = proj[2*S.selected+1];
+    mctx.strokeStyle = "#ffffff"; mctx.lineWidth = 1.5*DPR;
+    mctx.beginPath(); mctx.arc(x, y, 9*DPR, 0, 6.2832); mctx.stroke();
+    mctx.beginPath(); mctx.moveTo(x-16*DPR,y); mctx.lineTo(x-11*DPR,y); mctx.moveTo(x+11*DPR,y); mctx.lineTo(x+16*DPR,y);
+    mctx.moveTo(x,y-16*DPR); mctx.lineTo(x,y-11*DPR); mctx.moveTo(x,y+11*DPR); mctx.lineTo(x,y+16*DPR); mctx.stroke();
+  }
+}
+
+// interaction: rotate / zoom / hover
+let drag = null;
+map.addEventListener("pointerdown", e => { drag = {x:e.clientX, y:e.clientY, yaw:S.view.yaw, pitch:S.view.pitch, moved:false}; map.setPointerCapture(e.pointerId); });
+map.addEventListener("pointermove", e => {
+  if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; map.classList.add("dragging"); }
+    if (drag.moved) {
+      S.view.yaw = drag.yaw + dx * 0.008;
+      S.view.pitch = Math.max(-1.5708, Math.min(1.5708, drag.pitch - dy * 0.008));
+      setViewButtons(null); project(); drawBase(); render(); hideTip();
+    }
+    return;
+  }
+  hover(e);
+});
+map.addEventListener("pointerup", e => {
+  if (drag && !drag.moved) { const i = pick(e); if (i >= 0) select(i, true); }
+  drag = null; map.classList.remove("dragging");
+});
+map.addEventListener("pointerleave", hideTip);
+map.addEventListener("wheel", e => {
+  e.preventDefault();
+  S.view.zoom = Math.max(0.6, Math.min(12, S.view.zoom * Math.exp(-e.deltaY * 0.0015)));
+  project(); drawBase(); render();
+}, {passive:false});
+map.addEventListener("dblclick", () => setView(currentView || "front"));
+
+function pick(e) {
+  if (!S.run || !proj) return -1;
+  const r = map.getBoundingClientRect(), mx = (e.clientX - r.left) * DPR, my = (e.clientY - r.top) * DPR;
+  let best = -1, bd = (12*DPR) ** 2;
+  const cand = S.run.rateI;
+  for (let k = 0; k < cand.length; k++) {
+    const i = cand[k], dx = proj[2*i]-mx, dy = proj[2*i+1]-my, d = dx*dx + dy*dy;
+    if (d < bd) { bd = d; best = i; }
+  }
+  return best;
+}
+const mapTip = $("#mapTip");
+function hover(e) {
+  const i = pick(e);
+  if (i < 0) return hideTip();
+  const r = S.run.byIndex.get(i), rate = S.run.rateOf.get(i) || 0;
+  mapTip.innerHTML = `<b>${esc(r ? nameOf(r) : "neuron " + i)}</b><small>${esc(r ? (CLASS_LABEL[r[3]]||r[3]) + (r[4] ? " · " + r[4] : "") : "")}</small><span class="mono">${rate.toFixed(1)} Hz mean</span>`;
+  const box = $("#scope").getBoundingClientRect();
+  let x = e.clientX - box.left + 12, y = e.clientY - box.top + 12;
+  mapTip.hidden = false;
+  if (x + mapTip.offsetWidth > box.width - 6) x -= mapTip.offsetWidth + 24;
+  if (y + mapTip.offsetHeight > box.height - 6) y -= mapTip.offsetHeight + 24;
+  mapTip.style.left = x + "px"; mapTip.style.top = y + "px";
+}
+function hideTip() { mapTip.hidden = true; }
+
+const VIEWS = {front:{yaw:0,pitch:0}, top:{yaw:0,pitch:-1.5708}, side:{yaw:1.5708,pitch:0}};
+let currentView = "front";
+function setView(v) { currentView = v; Object.assign(S.view, VIEWS[v], {zoom:1,panX:0,panY:0}); setViewButtons(v); project(); drawBase(); render(); }
+function setViewButtons(v) { if (v === null) currentView = null; document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === v)); }
+document.querySelectorAll("#viewSeg button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+document.querySelectorAll("#modeSeg button").forEach(b => b.addEventListener("click", () => {
+  S.mode = b.dataset.mode;
+  document.querySelectorAll("#modeSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  $("#lutLo").textContent = S.mode === "mean" ? "0 Hz" : "quiet";
+  $("#lutHi").textContent = S.mode === "mean" ? (S.run ? Math.round(S.run.maxRate) + " Hz" : "high") : "bursting";
+  if (S.mode === "mean") pause();
+  render();
+}));
+
+// ---------- playback ----------
+let lastTs = 0;
+function frame(ts) {
+  if (!S.playing) return;
+  const dt = lastTs ? Math.min(100, ts - lastTs) : 16; lastTs = ts;
+  S.t += dt * S.speed;
+  if (S.t > S.run.params.t_run) S.t = 0;
+  syncTime(); render();
+  requestAnimationFrame(frame);
+}
+function play() {
+  if (!S.run) return;
+  if (S.mode !== "replay") $('#modeSeg [data-mode="replay"]').click();
+  S.playing = true; lastTs = 0; $("#playBtn").setAttribute("aria-label", "Pause");
+  $("#playIcon").innerHTML = '<path d="M3 1.5h3v11H3zM8 1.5h3v11H8z"/>'; requestAnimationFrame(frame);
+}
+function pause() { S.playing = false; $("#playBtn").setAttribute("aria-label", "Play"); $("#playIcon").innerHTML = '<path d="M3 1.5v11l9-5.5z"/>'; }
+$("#playBtn").addEventListener("click", () => S.playing ? pause() : play());
+$("#scrub").addEventListener("input", e => {
+  S.t = +e.target.value;
+  if (S.mode !== "replay") { S.mode = "replay"; document.querySelectorAll("#modeSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === "replay")); }
+  syncTime(); render();
+});
+$("#speed").addEventListener("change", e => S.speed = +e.target.value);
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !/INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); S.playing ? pause() : play(); }
+});
+let lastMarkerDraw = 0;
+function syncTime() {
+  $("#clock").textContent = S.t.toFixed(1) + " ms";
+  $("#scrub").value = S.t;
+  const now = performance.now();
+  if (now - lastMarkerDraw > 60) { lastMarkerDraw = now; drawTimeMarkers(); }
+}
+
+// ---------- run loading ----------
+function loadRun(p) {
+  const run = Object.assign({}, p);
+  run.replayN = b64(p.replay.n, Uint32Array); run.replayT = b64(p.replay.t, Uint32Array);
+  run.rateI = b64(p.rates.i, Uint32Array); run.rateR = b64(p.rates.r, Float32Array);
+  run.rateOf = new Map(); run.maxRate = 1;
+  for (let k = 0; k < run.rateI.length; k++) { run.rateOf.set(run.rateI[k], run.rateR[k]); if (run.rateR[k] > run.maxRate) run.maxRate = run.rateR[k]; }
+  run.byIndex = new Map(p.active.map(r => [r[0], r]));
+  run.stimSet = new Set(p.stim);
+  S.run = run; S.t = 0; S.selected = -1; S.rowsShown = 25;
+  $("#scrub").max = p.params.t_run;
+  $("#runTitle").textContent = p.label;
+  const pr = p.params;
+  $("#stats").innerHTML = [
+    `<span><b>${fmt.format(p.n_active)}</b> of ${fmt.format(S.geo.n)} neurons fired</span>`,
+    `<span><b>${fmt.format(p.n_spikes)}</b> spikes</span>`,
+    `<span>${pr.n_run} × ${fmt.format(pr.t_run)} ms at ${pr.rate} Hz</span>`,
+    p.silence.length ? `<span>${p.silence.length} silenced</span>` : "",
+    p.elapsed_s ? `<span>computed in ${p.elapsed_s} s</span>` : ""
+  ].join("");
+  $("#lutHi").textContent = S.mode === "mean" ? Math.round(run.maxRate) + " Hz" : "bursting";
+  $("#info").hidden = true;
+  syncTime(); render(); drawOutputs(); drawPop(); drawRaster(); drawTable();
+}
+
+// ---------- brain output ----------
+function drawOutputs() {
+  const el = $("#outputs"), run = S.run;
+  const outs = run.active.filter(r => (r[3] === "descending" || r[3] === "motor") && !r[8]).slice(0, 12);
+  if (!outs.length) { el.innerHTML = '<p class="empty">No descending or motor neurons fired. This stimulus stays inside the brain.</p>'; return; }
+  const mx = outs[0][6];
+  el.innerHTML = outs.map(r => {
+    const beh = KNOWN[r[1]] || KNOWN[r[2]] || (CLASS_LABEL[r[3]] + " neuron");
+    return `<button class="out" data-i="${r[0]}"><span class="nm">${esc(nameOf(r))}${r[4] ? ` <span class="sub">${esc(r[4])}</span>` : ""}</span><span class="bh">${esc(beh)}</span><span class="rt">${r[6].toFixed(1)} Hz</span><span class="bar"><i style="width:${(100*r[6]/mx).toFixed(1)}%"></i></span></button>`;
+  }).join("");
+  el.querySelectorAll(".out").forEach(b => b.addEventListener("click", () => select(+b.dataset.i, true)));
+}
+
+// ---------- population chart ----------
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function popSeries() {
+  const out = {}, s = S.run.series;
+  for (const [k, v] of Object.entries(s)) {
+    const key = SERIES_KEYS.includes(k) ? k : "other";
+    if (!out[key]) out[key] = v.slice(); else v.forEach((x, j) => out[key][j] += x);
+  }
+  return SERIES.filter(([k]) => out[k]).map(([k, c]) => ({key:k, color:css(c), values:out[k]}));
+}
+function niceMax(v) { if (v <= 0) return 1; const p = 10 ** Math.floor(Math.log10(v)), f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
+let popGeom = null;
+function drawPop() {
+  const svg = $("#popSvg"), run = S.run; if (!run) return;
+  const series = popSeries();
+  const leg = $("#legend");
+  leg.innerHTML = series.map(s => `<button aria-pressed="${!S.hidden.has(s.key)}" data-k="${s.key}"><i style="background:${s.color}"></i>${CLASS_LABEL[s.key] || s.key}</button>`).join("");
+  leg.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const k = b.dataset.k; S.hidden.has(k) ? S.hidden.delete(k) : S.hidden.add(k); drawPop(); }));
+  const vis = series.filter(s => !S.hidden.has(s.key));
+  const w = svg.clientWidth || 600, h = 240, m = {l:46, r:10, t:10, b:24};
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  const T = run.params.t_run, bin = run.params.bin_ms, nb = (vis[0] || series[0]).values.length;
+  const ymax = niceMax(Math.max(1, ...vis.flatMap(s => s.values)));
+  const X = t => m.l + (w - m.l - m.r) * t / T, Y = v => m.t + (h - m.t - m.b) * (1 - v / ymax);
+  const ink2 = css("--muted"), grid = css("--line");
+  let g = "";
+  for (let k = 0; k <= 4; k++) { const v = ymax * k / 4, y = Y(v);
+    g += `<line x1="${m.l}" x2="${w-m.r}" y1="${y}" y2="${y}" stroke="${grid}" stroke-width="1"/>`;
+    g += `<text x="${m.l-6}" y="${y+4}" text-anchor="end" font-size="11" fill="${ink2}" font-family="Chivo Mono, monospace">${fmt.format(v)}</text>`; }
+  const step = T <= 300 ? 50 : T <= 1000 ? 200 : 500;
+  for (let t = 0; t <= T; t += step) g += `<text x="${X(t)}" y="${h-6}" text-anchor="middle" font-size="11" fill="${ink2}" font-family="Chivo Mono, monospace">${t}${t === 0 ? "" : ""}</text>`;
+  g += `<text x="${w-m.r}" y="${h-6}" text-anchor="end" font-size="11" fill="${ink2}" dy="-12">ms</text>`;
+  for (const s of vis) {
+    const d = s.values.map((v, j) => `${j ? "L" : "M"}${X((j + 0.5) * bin).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  if (!vis.length) g += `<text x="${w/2}" y="${h/2}" text-anchor="middle" fill="${ink2}" font-size="12">All classes hidden. Pick one above.</text>`;
+  g += `<line id="popNow" x1="0" x2="0" y1="${m.t}" y2="${h-m.b}" stroke="${css("--accent")}" stroke-width="1" stroke-dasharray="3 3"/>`;
+  g += `<line id="popHair" x1="0" x2="0" y1="${m.t}" y2="${h-m.b}" stroke="${css("--text-2")}" stroke-width="1" visibility="hidden"/>`;
+  g += `<rect x="${m.l}" y="${m.t}" width="${w-m.l-m.r}" height="${h-m.t-m.b}" fill="transparent" id="popHit" style="cursor:crosshair"/>`;
+  svg.innerHTML = g;
+  popGeom = {X, m, w, h, T, bin, nb, vis};
+  drawTimeMarkers();
+  const hit = $("#popHit"), tip = $("#popTip");
+  hit.addEventListener("mousemove", e => {
+    const r = svg.getBoundingClientRect(), x = e.clientX - r.left;
+    const t = Math.max(0, Math.min(T, (x - m.l) / (w - m.l - m.r) * T)), j = Math.min(nb - 1, Math.floor(t / bin));
+    const hair = $("#popHair"); hair.setAttribute("x1", X((j+0.5)*bin)); hair.setAttribute("x2", X((j+0.5)*bin)); hair.setAttribute("visibility", "visible");
+    tip.innerHTML = `<small>${(j*bin).toFixed(0)}–${((j+1)*bin).toFixed(0)} ms · click to jump</small>` +
+      vis.slice().sort((a,b) => b.values[j]-a.values[j]).map(s => `<div class="row"><span><i style="background:${s.color}"></i> ${CLASS_LABEL[s.key]}</span><span class="mono">${fmt.format(Math.round(s.values[j]))}</span></div>`).join("");
+    tip.hidden = false;
+    let tx = x + 14; if (tx + tip.offsetWidth > r.width) tx = x - tip.offsetWidth - 14;
+    tip.style.left = tx + "px"; tip.style.top = "8px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.hidden = true; $("#popHair").setAttribute("visibility", "hidden"); });
+  hit.addEventListener("click", e => { const r = svg.getBoundingClientRect(); S.t = Math.max(0, Math.min(T, (e.clientX - r.left - m.l) / (w - m.l - m.r) * T)); syncTime(); render(); });
+}
+
+// ---------- raster ----------
+const ras = $("#raster");
+let rasGeom = null;
+function drawRaster() {
+  const run = S.run; if (!run) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), w = ras.clientWidth || 500, h = ras.clientHeight || 260;
+  ras.width = w * dpr; ras.height = h * dpr;
+  const c = ras.getContext("2d"); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  const rows = run.raster, L = Math.min(118, w * 0.3), R = 6, top = 4, bot = 20, T = run.params.t_run;
+  const rh = (h - top - bot) / Math.max(1, rows.length);
+  const ink = css("--text"), ink2 = css("--muted"), stimC = css("--s2"), grid = css("--line");
+  c.font = `${Math.max(9, Math.min(11, rh))}px "Chivo Mono", monospace`; c.textBaseline = "middle";
+  const X = t => L + (w - L - R) * t / T;
+  rows.forEach((row, k) => {
+    const y = top + k * rh, isStim = run.stimSet.has(row.i), r = run.byIndex.get(row.i);
+    if (k % Math.ceil(11 / rh) === 0) { c.fillStyle = ink2; c.textAlign = "right"; c.fillText((r ? nameOf(r) : row.i).toString().slice(0, 14), L - 6, y + rh/2); }
+    c.fillStyle = isStim ? stimC : ink; c.globalAlpha = isStim ? 0.9 : 0.8;
+    for (const t of row.t) c.fillRect(X(t) - 0.5, y + rh*0.15, 1, Math.max(1, rh*0.7));
+    c.globalAlpha = 1;
+    if (row.i === S.selected) { c.strokeStyle = css("--accent"); c.lineWidth = 1; c.strokeRect(L, y, w - L - R, rh); }
+  });
+  c.strokeStyle = grid; c.beginPath(); c.moveTo(L, h - bot + 0.5); c.lineTo(w - R, h - bot + 0.5); c.stroke();
+  c.fillStyle = ink2; c.textAlign = "center"; c.font = '11px "Chivo Mono", monospace';
+  const step = T <= 300 ? 50 : T <= 1000 ? 200 : 500;
+  for (let t = 0; t <= T; t += step) c.fillText(t, X(t), h - 8);
+  rasGeom = {L, R, top, rh, w, h, X, T, bot, dpr};
+  rasImg = c.getImageData(0, 0, ras.width, ras.height);
+  drawTimeMarkers();
+}
+let rasImg = null;
+function rasterRow(e) { const r = ras.getBoundingClientRect(), y = e.clientY - r.top; const k = Math.floor((y - rasGeom.top) / rasGeom.rh); return (k >= 0 && k < S.run.raster.length) ? k : -1; }
+ras.addEventListener("mousemove", e => {
+  if (!rasGeom) return; const k = rasterRow(e), tip = $("#rasTip");
+  if (k < 0) { tip.hidden = true; return; }
+  const row = S.run.raster[k], r = S.run.byIndex.get(row.i);
+  tip.innerHTML = `<b>${esc(r ? nameOf(r) : row.i)}</b><small>${esc(r ? (CLASS_LABEL[r[3]]||r[3]) : "")}${S.run.stimSet.has(row.i) ? " · stimulated" : ""}</small><span class="mono">${row.t.length} spikes in trial 1 · ${(S.run.rateOf.get(row.i)||0).toFixed(1)} Hz mean</span>`;
+  tip.hidden = false; const box = ras.getBoundingClientRect(); let x = e.clientX - box.left + 12; if (x + tip.offsetWidth > box.width) x -= tip.offsetWidth + 24;
+  tip.style.left = x + "px"; tip.style.top = Math.min(e.clientY - box.top + 12, box.height - tip.offsetHeight) + "px";
+});
+ras.addEventListener("mouseleave", () => $("#rasTip").hidden = true);
+ras.addEventListener("click", e => { const k = rasterRow(e); if (k >= 0) select(S.run.raster[k].i, true); });
+
+function drawTimeMarkers() {
+  if (popGeom) { const x = popGeom.X(S.t), l = $("#popNow"); if (l) { l.setAttribute("x1", x); l.setAttribute("x2", x); } }
+  if (rasGeom && rasImg) {
+    const c = ras.getContext("2d"); c.setTransform(1,0,0,1,0,0); c.putImageData(rasImg, 0, 0);
+    c.setTransform(rasGeom.dpr,0,0,rasGeom.dpr,0,0);
+    const x = rasGeom.X(S.t); c.strokeStyle = css("--accent"); c.lineWidth = 1; c.setLineDash([3,3]);
+    c.beginPath(); c.moveTo(x, rasGeom.top); c.lineTo(x, rasGeom.h - rasGeom.bot); c.stroke(); c.setLineDash([]);
+  }
+}
+
+// ---------- table ----------
+function drawTable() {
+  const run = S.run, q = $("#filter").value.trim().toLowerCase();
+  let rows = run.active;
+  if (q) rows = rows.filter(r => (r[2]||"").toLowerCase().includes(q) || r[1].includes(q) || (CLASS_LABEL[r[3]]||r[3]).toLowerCase().includes(q) || (r[5]||"").toLowerCase().includes(q));
+  const mx = run.active.length ? run.active[0][6] : 1;
+  $("#tableTitle").textContent = `Active neurons (${fmt.format(run.n_active)}${run.n_active > run.active.length ? ", top " + fmt.format(run.active.length) + " listed" : ""})`;
+  $("#tbody").innerHTML = rows.slice(0, S.rowsShown).map(r => {
+    const rank = run.active.indexOf(r) + 1;
+    return `<tr data-i="${r[0]}" class="${r[0] === S.selected ? "sel" : ""}"><td class="num mono">${rank}</td><td>${esc(nameOf(r))}${r[8] ? '<span class="tag">stimulated</span>' : ""}</td><td>${esc(CLASS_LABEL[r[3]] || r[3])}</td><td>${esc(r[4])}</td><td>${esc(r[5])}</td>` +
+      `<td class="num mono"><span class="rbar"><i style="width:${(100*r[6]/mx).toFixed(1)}%"></i></span>${r[6].toFixed(1)}</td><td class="num mono">${r[7].toFixed(1)}</td><td class="mono">${r[1]}</td></tr>`;
+  }).join("") || `<tr><td colspan="8" class="empty">No neurons match “${esc(q)}”.</td></tr>`;
+  $("#moreBtn").hidden = rows.length <= S.rowsShown;
+}
+$("#tbody").addEventListener("click", e => { const tr = e.target.closest("tr[data-i]"); if (tr) select(+tr.dataset.i, false); });
+$("#filter").addEventListener("input", () => { S.rowsShown = 25; drawTable(); });
+$("#moreBtn").addEventListener("click", () => { S.rowsShown += 100; drawTable(); });
+
+// ---------- selection ----------
+function select(i, scrollTable) {
+  S.selected = i; render(); drawRaster(); drawTable();
+  const r = S.run.byIndex.get(i), info = $("#info");
+  if (!r) { info.hidden = true; return; }
+  const beh = KNOWN[r[1]] || KNOWN[r[2]];
+  info.innerHTML = `<span class="n">${esc(nameOf(r))}</span><span class="meta">${esc(CLASS_LABEL[r[3]] || r[3])}${r[4] ? " · " + esc(r[4]) : ""}${r[5] ? " · " + esc(r[5]) : ""}${beh ? " · " + esc(beh) : ""}</span>` +
+    `<span class="mono">${r[6].toFixed(1)} ± ${r[7].toFixed(1)} Hz</span><span class="mono meta">${r[1]}</span>` +
+    `<span class="acts">${LIVE ? `<button class="btn" id="aStim">Stimulate this</button><button class="btn" id="aSil">Silence this</button>` : ""}<a href="https://codex.flywire.ai/app/cell_details?root_id=${r[1]}" target="_blank" rel="noopener">Open in FlyWire Codex</a></span>`;
+  info.hidden = false;
+  if (LIVE) { $("#aStim").onclick = () => addToken("stim", r[1]); $("#aSil").onclick = () => addToken("sil", r[1]); }
+  if (scrollTable) { const tr = document.querySelector(`#tbody tr[data-i="${i}"]`); if (tr) tr.scrollIntoView({block:"nearest"}); }
+}
+
+// ---------- controls ----------
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function renderTokens() {
+  for (const [k, el] of [["stim", "#stimTokens"], ["sil", "#silTokens"]]) {
+    $(el).innerHTML = S[k].map((t, j) => `<span class="token">${esc(t)}<button data-k="${k}" data-j="${j}" aria-label="Remove ${esc(t)}">×</button></span>`).join("");
+  }
+  document.querySelectorAll(".token button").forEach(b => b.addEventListener("click", () => { S[b.dataset.k].splice(+b.dataset.j, 1); renderTokens(); }));
+  document.querySelectorAll("#presetChips .chip").forEach(c => c.setAttribute("aria-pressed", S.stim.includes(c.dataset.p)));
+}
+function addToken(k, v) { v = String(v).trim(); if (v && !S[k].includes(v)) S[k].push(v); renderTokens(); }
+$("#stimAdd").addEventListener("click", () => { addToken("stim", $("#stimInput").value); $("#stimInput").value = ""; });
+$("#silAdd").addEventListener("click", () => { addToken("sil", $("#silInput").value); $("#silInput").value = ""; });
+$("#stimInput").addEventListener("keydown", e => { if (e.key === "Enter") $("#stimAdd").click(); });
+$("#silInput").addEventListener("keydown", e => { if (e.key === "Enter") $("#silAdd").click(); });
+$("#rate").addEventListener("input", e => $("#rateVal").textContent = e.target.value + " Hz");
+function renderPresets() {
+  $("#presetChips").innerHTML = S.presets.filter(p => p.n > 0).map(p => `<button class="chip" data-p="${p.name}" title="${esc(p.desc)} (${p.n} neurons)" aria-pressed="false">${p.name.replace(/_/g, " ")}</button>`).join("");
+  document.querySelectorAll("#presetChips .chip").forEach(c => c.addEventListener("click", () => {
+    const p = c.dataset.p; S.stim.includes(p) ? S.stim.splice(S.stim.indexOf(p), 1) : S.stim.push(p); renderTokens();
+  }));
+}
+function setStatus(msg, err) { const s = $("#status"); s.textContent = msg; s.classList.toggle("err", !!err); }
+
+async function runLive() {
+  if (!S.stim.length) return setStatus("Choose at least one neuron to stimulate.", true);
+  const body = { stim:S.stim, silence:S.sil, rate:+$("#rate").value, trials:+$("#trials").value, duration:+$("#duration").value,
+    label: S.stim.map(s => s.replace(/_/g, " ")).join(" + ") + (S.sil.length ? " · silenced " + S.sil.join(", ") : "") };
+  $("#runBtn").disabled = true; $("#prog").style.width = "2%"; setStatus("Starting…");
+  try {
+    const r = await fetch("api/run", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    const j = await r.json(); if (!r.ok) throw new Error(j.error || "Run failed");
+    const t0 = Date.now();
+    while (true) {
+      await new Promise(res => setTimeout(res, 600));
+      const s = await (await fetch("api/status")).json();
+      if (s.state === "running") {
+        $("#prog").style.width = Math.max(2, 100 * s.trial / s.n_run) + "%";
+        setStatus(`Simulating trial ${Math.min(s.trial + 1, s.n_run)} of ${s.n_run} · ${Math.round((Date.now()-t0)/1000)} s`);
+      } else if (s.state === "done") { $("#prog").style.width = "100%"; setStatus("Done."); loadRun(s.result); break; }
+      else if (s.state === "error") throw new Error(s.error);
+      else throw new Error("Simulation stopped unexpectedly.");
+    }
+  } catch (e) { setStatus(e.message, true); }
+  finally { $("#runBtn").disabled = false; setTimeout(() => $("#prog").style.width = "0", 1200); }
+}
+$("#runBtn").addEventListener("click", runLive);
+
+function initDemo() {
+  $("#demoField").hidden = false; $("#localNote").hidden = false;
+  $("#runBtn").disabled = true; $("#runBtn").textContent = "Live runs need the local app";
+  const list = $("#demoList");
+  list.innerHTML = EMBED.runs.map((r, k) => `<button class="demo-item" data-k="${k}" aria-pressed="${k === 0}"><b>${esc(r.label)}</b><span>${esc(r.blurb || "")}</span></button>`).join("");
+  list.querySelectorAll(".demo-item").forEach(b => b.addEventListener("click", () => {
+    list.querySelectorAll(".demo-item").forEach(x => x.setAttribute("aria-pressed", x === b));
+    const r = EMBED.runs[+b.dataset.k]; S.stim = r.stim_spec || []; S.sil = r.silence_spec || []; renderTokens(); pause(); loadRun(r);
+  }));
+  const r0 = EMBED.runs[0]; S.stim = r0.stim_spec || []; S.sil = r0.silence_spec || [];
+}
+
+// ---------- theme / resize ----------
+function redrawCharts() { if (S.run) { drawPop(); drawRaster(); } }
+new ResizeObserver(() => { resizeMap(); }).observe($("#scope"));
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(redrawCharts, 120); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawCharts);
+new MutationObserver(redrawCharts).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+
+// ---------- boot ----------
+async function boot() {
+  try {
+    if (LIVE) {
+      $("#modePill").textContent = "Loading brain…";
+      const [g, p] = await Promise.all([fetch("api/geometry").then(r => r.json()), fetch("api/presets").then(r => r.json())]);
+      loadGeometry(g); S.presets = p; S.stim = ["sugar"];
+      $("#modePill").textContent = "Live"; $("#modePill").classList.add("live");
+      setStatus("Pick what to stimulate, then run. One simulated second takes about 10 s per trial.");
+    } else {
+      loadGeometry(EMBED.geometry); S.presets = EMBED.presets;
+      $("#modePill").textContent = "Recorded runs";
+      initDemo();
+    }
+    $("#dataset").textContent = `FlyWire connectome v783 · ${fmt.format(S.geo.n)} neurons · 15.1M connections`;
+    renderPresets(); renderTokens(); resizeMap();
+    if (!LIVE) { loadRun(EMBED.runs[0]); }
+    else { $("#runTitle").textContent = "Run a simulation to see activity"; }
+  } catch (e) {
+    $("#modePill").textContent = "Offline";
+    setStatus("Could not reach the simulator. Start it with: python -m flybrain serve", true);
+    console.error(e);
+  }
+}
+boot();
+})();
+</script>
