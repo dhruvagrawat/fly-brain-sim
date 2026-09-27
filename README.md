@@ -1,83 +1,65 @@
-# fly-brain-sim
+# Flybrain
 
-Simulate an entire fruit fly brain on your laptop. Stimulate any set of neurons and watch the activity spread through all ~139,000 neurons and 15 million connections of the adult *Drosophila* connectome.
+**Every neuron of a fruit fly's brain, switched on.**
 
-The model is the whole-brain leaky integrate-and-fire model from
-[Shiu et al., *Nature* 2024](https://www.nature.com/articles/s41586-024-07763-9),
-rewritten in NumPy + Numba (no Brian2), so one simulated second of the full brain takes ~9 s on a single CPU core.
+Flybrain simulates all **138,639 neurons** and **15.1 million connections** of the adult *Drosophila* brain. Stimulate any cell type and watch the signal spread, from taste or vision to the neurons that move the body. There's a 3D lab, a plain-language command center, and a Python simulator that runs on a laptop.
+
+Built by [Dhruv Agrawat](https://github.com/dhruvagrawat).
+
+<!-- Add your Vercel URL here once deployed: **Live site →** https://flybrain.vercel.app -->
+
+## What's inside
+
+- **The lab.** A WebGL map of every neuron at its real position, replaying experiments spike by spike. Brain output readout (feeding, escape, walking), population chart, spike raster, neuron table, experiment log and run comparison.
+- **Command center.** Press <kbd>⌘K</kbd> and type `stimulate sugar at 200 hz, silence CB0248, run`.
+- **Animated explainers.** A live neuron you drive with sliders, and a toy circuit you can lesion by clicking.
+- **Simulator.** A NumPy + Numba reimplementation of the Shiu et al. (2024) whole-brain model: one simulated second in ~9 s on one CPU core.
+- **Docs.** Guides, model details, API reference, [roadmap](ROADMAP.md), [changelog](CHANGELOG.md) and a [lab notebook](NOTEBOOK.md) of experiment results.
 
 ## Quick start
 
 ```bash
+git clone https://github.com/dhruvagrawat/fly-brain-sim && cd fly-brain-sim
 pip install -r requirements.txt
-python -m flybrain fetch                 # downloads ~140 MB of connectome data into data/
-python -m flybrain presets               # list named neuron sets
+python -m flybrain fetch            # ~140 MB of connectome data, once
+python -m flybrain serve            # the lab at http://127.0.0.1:8050
+```
+
+Or straight from the terminal:
+
+```bash
 python -m flybrain run --stim sugar --rate 200 --trials 10
+python -m flybrain run --stim looming --silence DNp01
 ```
 
-Stimulating sugar-taste neurons activates ~400 neurons downstream, including the proboscis motor neuron MN9 (`720575940660219265`). That reproduces the feeding result from the paper.
+Stimulating sugar-taste neurons activates ~430 neurons and drives the feeding motor neuron MN9 at ~115 Hz, reproducing the paper's key result.
 
-## Web interface
+### Web app
 
 ```bash
-python -m flybrain serve          # opens http://127.0.0.1:8050
+cd web && npm install
+npm run dev        # develop on :3000
+npm run build      # static site in web/out/, which `flybrain serve` also serves
 ```
 
-Pick neurons to stimulate or silence and press **Run simulation**. You get:
+Deploys to Vercel with no settings: import the repo at [vercel.com/new](https://vercel.com/new). The hosted site replays recorded experiments and can connect to a local `flybrain serve` for live runs.
 
-- **Brain map**: all 138,639 neurons at their real 3D positions. Active neurons glow as the run replays spike by spike. Drag to rotate, scroll to zoom, switch to front/top/side views, or show mean firing rate instead of the replay.
-- **Brain output**: the descending and motor neurons that fired, i.e. the brain's commands to the body. Known behaviours (MN9 feeding, giant fiber escape, moonwalker backward walking, ...) are labelled.
-- **Population activity**: spikes per second over time for each neuron class.
-- **Spike raster** of the most active neurons.
-- **Neuron table** with cell type, class, side, transmitter and rate. Click any neuron to find it on the map, open it in FlyWire Codex, or add it to the next experiment.
+## Repository
 
-`docs/index.html` is a standalone copy with five recorded experiments baked in (sugar → feeding, forward walking, giant fiber escape, moonwalker, PPL1 dopamine). It opens in any browser with no install. The repo is set up for Vercel (`vercel.json` serves `docs/` as a static site): import the repo at vercel.com/new and deploy, no settings needed. Rebuild it with `python scripts/build_demo.py`.
-
-### What you can stimulate or silence
-
-`--stim` and `--silence` each accept any mix of:
-
-- a **preset**: `sugar`, `giant_fiber`, `moonwalker`, `forward_walk`, `steer`, `ppl1_dopamine`, `clock_lnv`
-- a **cell type** from the FlyWire annotations, e.g. `DNp01`, `MBON01`, `PAM05`
-- raw **FlyWire root IDs** (v783)
-
-```bash
-# does silencing a neuron block the feeding response?
-python -m flybrain run --stim sugar --silence 720575940622695448 --trials 10
+```text
+flybrain/        Python simulator, CLI and local server
+scripts/         export recorded experiments for the web
+web/             Next.js site: landing page, lab, docs (content/docs/*.md)
+CHANGELOG.md     what changed
+ROADMAP.md       what's next: virtual body, training, the male brain
+NOTEBOOK.md      experiment results
 ```
 
-Outputs go to `results/latest/`: `rates.csv` (firing rate per active neuron, with cell type, class and neurotransmitter) and `spikes.parquet` (every spike).
+## Credits
 
-### Python API
+Flybrain is my project. The science underneath comes from:
 
-```python
-from flybrain import data, model, neurons
+- **FlyWire connectome.** Dorkenwald et al., *Nature* 2024. Cell types and positions: Schlegel et al., *Nature* 2024.
+- **Whole-brain model and packaged data.** Shiu et al., *Nature* 2024 · [philshiu/Drosophila_brain_model](https://github.com/philshiu/Drosophila_brain_model) (MIT).
 
-con = data.load()
-ann = data.load_annotations(con)
-stim = neurons.resolve("sugar", ann)
-res = model.simulate(con, stim, params=model.Params(n_run=5, r_poi=200))
-print(res.rates().head())
-```
-
-## Model
-
-Each neuron is a leaky integrate-and-fire unit with an exponentially decaying synaptic current:
-
-```
-dv/dt = (v_0 - v + g) / t_mbr        dg/dt = -g / tau
-```
-
-A spike adds `w_syn × (signed synapse count)` to each target's `g` after a 1.8 ms delay. Sign comes from the predicted neurotransmitter (GABA and glutamate are inhibitory). Stimulated neurons get Poisson input. All parameters (`flybrain/model.py → Params`) follow Shiu et al.: v_0 = −52 mV, v_th = −45 mV, t_mbr = 20 ms, tau = 5 ms, refractory 2.2 ms, w_syn = 0.275 mV.
-
-Silencing removes a neuron's outgoing synapses.
-
-## Data and credits
-
-- Connectome: FlyWire whole-brain connectome, materialization v783 ([Dorkenwald et al. 2024](https://www.nature.com/articles/s41586-024-07558-y)), as packaged by [philshiu/Drosophila_brain_model](https://github.com/philshiu/Drosophila_brain_model) (MIT).
-- Cell types and positions: [flyconnectome/flywire_annotations](https://github.com/flyconnectome/flywire_annotations) ([Schlegel et al. 2024](https://www.nature.com/articles/s41586-024-07686-5)).
-- Model: [Shiu et al. 2024](https://www.nature.com/articles/s41586-024-07763-9).
-
-This is the FlyWire (female) brain. The September 2026 MaleCNS v1.0 connectome from Janelia/Google is a candidate for a future data source.
-
-The data is downloaded at runtime and not redistributed here. Please cite the papers above if you use this in research.
+Full citations are in [the docs](web/content/docs/credits.md). Connectome data is downloaded at runtime and not redistributed. Please cite the original papers if you use this in research.

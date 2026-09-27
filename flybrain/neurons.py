@@ -25,6 +25,7 @@ MN9 = 720575940660219265
 #: preset name -> (description, spec). spec is a list of IDs or {"cell_type": [...]}.
 PRESETS: dict[str, tuple[str, object]] = {
     "sugar": ("Sugar-taste neurons, one side (drives feeding / MN9)", SUGAR_GRN),
+    "looming": ("LPLC2 looming detectors (optic lobe): approaching-object alarm", {"cell_type": ["LPLC2"]}),
     "giant_fiber": ("Giant fiber descending neurons: escape jump", {"cell_type": ["DNp01"]}),
     "moonwalker": ("Moonwalker descending neurons (MDN): backward walking", {"cell_type": ["MDN"]}),
     "forward_walk": ("DNp09 descending neurons: forward walking", {"cell_type": ["DNp09"]}),

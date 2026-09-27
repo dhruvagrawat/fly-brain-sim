@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import threading
 import time
 import traceback
@@ -12,6 +13,8 @@ from pathlib import Path
 from . import data, model, neurons, viz
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
+#: Built Next.js site (cd web && npm run build). Served when present.
+SITE_DIR = Path(__file__).resolve().parent.parent / "web" / "out"
 
 
 HEAD = ('<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n'
@@ -99,19 +102,65 @@ def make_handler(state: State):
         def log_message(self, fmt, *args):
             pass
 
-        def _send(self, body: bytes, ctype="application/json", code=200):
+        def _cors(self):
+            # Let the hosted site (e.g. on Vercel) drive this local simulator.
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Allow-Private-Network", "true")
+
+        def _send(self, body: bytes, ctype="application/json", code=200, cache="no-store"):
             self.send_response(code)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "no-store")
+            self.send_header("Cache-Control", cache)
+            self._cors()
             self.end_headers()
-            self.wfile.write(body)
+            if not getattr(self, "_head_only", False):
+                self.wfile.write(body)
+
+        def do_HEAD(self):
+            # Next.js prefetches pages with HEAD; answer with headers only.
+            self._head_only = True
+            try:
+                self.do_GET()
+            finally:
+                self._head_only = False
+
+        def do_OPTIONS(self):
+            self.send_response(204)
+            self._cors()
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def _static(self, path: str) -> bool:
+            """Serve a file from the built web app. Returns False if not found."""
+            if not SITE_DIR.is_dir():
+                return False
+            rel = path.lstrip("/")
+            target = (SITE_DIR / rel).resolve()
+            if SITE_DIR.resolve() not in target.parents and target != SITE_DIR.resolve():
+                return False
+            if target.is_dir():
+                target = target / "index.html"
+            elif not target.exists() and (SITE_DIR / (rel + ".html")).exists():
+                target = SITE_DIR / (rel + ".html")
+            if not target.is_file():
+                return False
+            ctype = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
+            if ctype.startswith("text/") or ctype in ("application/javascript", "application/json"):
+                ctype += "; charset=utf-8"
+            cache = "public, max-age=31536000, immutable" if "/_next/static/" in path else "no-cache"
+            self._send(target.read_bytes(), ctype, cache=cache)
+            return True
 
         def _json(self, obj, code=200):
             self._send(json.dumps(obj).encode(), code=code)
 
         def do_GET(self):
             path = self.path.split("?")[0]
+            if not path.startswith("/api/") and self._static(path):
+                return
             if path in ("/", "/index.html"):
                 self._send(page_html().encode(), "text/html; charset=utf-8")
             elif path == "/api/geometry":
@@ -143,7 +192,7 @@ def make_handler(state: State):
 def serve(host="127.0.0.1", port=8050, data_dir=data.DEFAULT_DATA_DIR, open_browser=True):
     state = State(data_dir)
     httpd = ThreadingHTTPServer((host, port), make_handler(state))
-    url = f"http://{host}:{port}/"
+    url = f"http://{host}:{port}/" + ("lab/" if SITE_DIR.is_dir() else "")
     print(f"Fly brain simulator running at {url}  (Ctrl+C to stop)", flush=True)
     if open_browser:
         threading.Timer(0.5, lambda: webbrowser.open(url)).start()
