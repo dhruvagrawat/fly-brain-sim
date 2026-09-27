@@ -31,7 +31,7 @@ Pick neurons to stimulate or silence and press **Run simulation**. You get:
 - **Spike raster** of the most active neurons.
 - **Neuron table** with cell type, class, side, transmitter and rate. Click any neuron to find it on the map, open it in FlyWire Codex, or add it to the next experiment.
 
-`docs/index.html` is a standalone copy with five recorded experiments baked in (sugar → feeding, forward walking, giant fiber escape, moonwalker, PPL1 dopamine). It opens in any browser with no install and can be served with GitHub Pages. Rebuild it with `python scripts/build_demo.py`.
+`docs/index.html` is a standalone copy with five recorded experiments baked in (sugar → feeding, forward walking, giant fiber escape, moonwalker, PPL1 dopamine). It opens in any browser with no install. The repo is set up for Vercel (`vercel.json` serves `docs/` as a static site): import the repo at vercel.com/new and deploy, no settings needed. Rebuild it with `python scripts/build_demo.py`.
 
 ### What you can stimulate or silence
 
