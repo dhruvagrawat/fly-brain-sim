@@ -5,7 +5,12 @@ import { marked } from "marked";
 export type DocPage = { slug: string; title: string; group: string; file: string; description?: string };
 
 const WEB = process.cwd();
-const ROOT = path.resolve(WEB, "..");
+// Project files (changelog, roadmap, notebook) live at the repo root; a synced copy in
+// web/content/project keeps the docs building when only web/ is deployed.
+const proj = (f: string) => {
+  const root = path.resolve(WEB, "..", f);
+  return fs.existsSync(root) ? root : path.join(WEB, "content", "project", f);
+};
 const c = (f: string) => path.join(WEB, "content", "docs", f);
 
 export const DOCS: DocPage[] = [
@@ -20,9 +25,9 @@ export const DOCS: DocPage[] = [
   { slug: "python", title: "Python API and CLI", group: "Build", file: c("python.md") },
   { slug: "architecture", title: "Architecture", group: "Build", file: c("architecture.md") },
   { slug: "deploying", title: "Deploying", group: "Build", file: c("deploying.md") },
-  { slug: "roadmap", title: "Roadmap", group: "Project", file: path.join(ROOT, "ROADMAP.md") },
-  { slug: "changelog", title: "Changelog", group: "Project", file: path.join(ROOT, "CHANGELOG.md") },
-  { slug: "notebook", title: "Lab notebook", group: "Project", file: path.join(ROOT, "NOTEBOOK.md") },
+  { slug: "roadmap", title: "Roadmap", group: "Project", file: proj("ROADMAP.md") },
+  { slug: "changelog", title: "Changelog", group: "Project", file: proj("CHANGELOG.md") },
+  { slug: "notebook", title: "Lab notebook", group: "Project", file: proj("NOTEBOOK.md") },
   { slug: "credits", title: "Credits and citations", group: "Project", file: c("credits.md") },
 ];
 

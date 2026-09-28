@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "npx serve out",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prebuild": "node scripts/sync-project-docs.mjs",
+    "predev": "node scripts/sync-project-docs.mjs"
   },
   "dependencies": {
     "@fontsource/bricolage-grotesque": "^5.2.0",

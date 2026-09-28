@@ -8,6 +8,8 @@ The repo is ready for Vercel with no settings to change. `vercel.json` at the ro
 2. Leave the defaults and press **Deploy**.
 3. Every push to `main` redeploys automatically, and pull requests get preview URLs.
 
+It works with either **Root Directory** setting. Left empty (repo root), the root `vercel.json` builds `web/`. Set to `web`, `web/vercel.json` builds in place. If you added Install or Build Command overrides in the Vercel project settings, remove them so these files apply. After deploying, set `NEXT_PUBLIC_SITE_URL` to your real URL (e.g. `https://your-project.vercel.app`) under Settings → Environment Variables and redeploy, so canonical links, the sitemap and social previews point at it.
+
 The hosted site is fully static: landing page, docs and the lab with recorded experiments. Live simulation needs the Python simulator, which is too heavy for serverless functions (~9 s of CPU per simulated second, plus 140 MB of data).
 
 ## Live simulation
