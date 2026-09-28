@@ -4,6 +4,26 @@ Dated notes from experiments run with Flybrain: what I tried, the numbers, and w
 
 ---
 
+## 2026-09-28 · Validating the app circuits
+
+**Taste (full brain, 2 × 500 ms).** Sugar 50/100/200 Hz → MN9 9/77/115 Hz. Bitter (32 neurons) → MN9 0. Salt (9) → 7 Hz. Sugar + bitter → **0** (bitter veto). Sugar + salt → 115. Sugar 200 + bitter 60 → 78 Hz, a partial veto.
+
+**Looming.** LPLC2 (both sides) 20/50/100/150 Hz → giant fiber ~70/140/195/230 Hz. Right-side looming drives the right giant fiber harder (60 vs 33 Hz at 20 Hz input).
+
+**Smell: a limitation.** Any odour at any rate (20–100 Hz) ignites ~10,000 neurons, including ~3,870 Kenyon cells. Things I tried: removing KC→KC edges (294k), removing ORN→ORN edges, scaling input onto KCs by 0.2 (KCs become sparse, ~250 or 5%, but ~6,000 neurons stay active) and isolating the olfactory system (all ~560 PNs still fire). None of them fixed it, so the antennal lobe itself runs away in this model. The first 15–20 ms *is* odour-specific (mould → DA2 only, CO₂ → V, pheromone → DA1, banana → DL1/DM2), so the smell app uses 20 ms sniffs with a reset between them.
+
+**Smell steering.** Per-sniff left-vs-right accuracy with baseline normalisation: pheromone 80%, ammonia 72%, banana 63%, CO₂ 60%, vinegar 55%. Plume navigation (12 trials, 250 sniffs, capture radius 40 px): brain **7/12** (pheromone and banana), random walk 3/12, scrambled 3–5/12, upwind-only 2/12.
+
+**Circuit packs** reproduce the full brain exactly (identical rates) in all 12 taste, 10 looming, 18 smell and 18 sandbox conditions.
+
+**Controls (JS, 3 seeds, 300 ms).** Sugar → MN9: real 110–123 Hz, scrambled targets 0, shuffled strengths 0. Looming → giant fiber: real 163–177 Hz, scrambled targets 0, shuffled strengths **47–73 Hz**. The escape path is direct enough that the bare connection map carries about a third of the signal.
+
+**Flappy Fly** (time-to-contact looming: pipe 450 ms, ground 380 ms). Real brain passes 1–13 pipes (mean ~8, ~19 s survival). Scrambled: 0 pipes, 0.7 s.
+
+**Fly Gangs, first rounds.** Mutants with PVLP011 + PVLP017 silenced (looming-circuit types) beat the Wild Types 22.1 vs 20.4. They dodge slightly better (170 vs 157 Hz) and feast about the same.
+
+---
+
 ## 2026-09-28 · Recorded experiment set
 
 Six runs exported for the site (1 s trials):

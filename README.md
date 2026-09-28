@@ -10,6 +10,7 @@ Built by [Dhruv Agrawat](https://github.com/dhruvagrawat).
 
 ## What's inside
 
+- **Eight apps** where the fly's own neurons take control, live in the browser: Fly Food Critic, Smell-o-vision, Fly Brain Surgeon, Flappy Fly, Twitch Plays Fly Brain, Fly Brain Radio, Is It Really the Fly? and Fly Gangs. Each has an autopilot and a scrambled-wiring control.
 - **The lab.** A WebGL map of every neuron at its real position, replaying experiments spike by spike. Brain output readout (feeding, escape, walking), population chart, spike raster, neuron table, experiment log and run comparison.
 - **Command center.** Press <kbd>⌘K</kbd> and type `stimulate sugar at 200 hz, silence CB0248, run`.
 - **Animated explainers.** A live neuron you drive with sliders, and a toy circuit you can lesion by clicking.
@@ -48,7 +49,7 @@ Deploys to Vercel with no settings: import the repo at [vercel.com/new](https://
 
 ```text
 flybrain/        Python simulator, CLI and local server
-scripts/         export recorded experiments for the web
+scripts/         export recorded experiments, build + validate app circuit packs, OG images
 web/             Next.js site: landing page, lab, docs (content/docs/*.md)
 CHANGELOG.md     what changed
 ROADMAP.md       what's next: virtual body, training, the male brain

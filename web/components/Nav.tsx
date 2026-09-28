@@ -24,6 +24,7 @@ export default function Nav() {
       <div className="container nav-in" style={path.startsWith("/lab") ? { maxWidth: 1600 } : undefined}>
         <Link href="/" className="brand" aria-label="Flybrain home">fly<b>brain</b><span className="brand-dot" aria-hidden /></Link>
         <nav className="nav-links" aria-label="Main">
+          <Link href="/apps/" aria-current={cur("/apps")}>Apps</Link>
           <Link href="/lab/" aria-current={cur("/lab")}>Lab</Link>
           <Link href="/docs/" aria-current={cur("/docs")}>Docs</Link>
           <Link href="/docs/roadmap/" className="hide-sm">Roadmap</Link>

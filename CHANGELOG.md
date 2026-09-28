@@ -2,6 +2,27 @@
 
 Every notable change to Flybrain, newest first. The format follows [Keep a Changelog](https://keepachangelog.com), and versions follow [SemVer](https://semver.org).
 
+## [0.4.0] – 2026-09-28
+
+Eight apps where a real fly brain takes control, running live in the browser.
+
+### Added
+- **In-browser simulator** (`web/lib/sim.ts`): a line-by-line port of the Numba LIF kernel, validated against Python (sugar → MN9 117 vs 122 Hz, looming → giant fiber within a few Hz).
+- **Circuit packs** (`scripts/build_circuits.py`): per-app sub-circuits (taste 5,164 neurons, loom 5,804, smell 4,061, sandbox 6,861) that reproduce the full 138,639-neuron brain exactly for every tested condition. 1.4–3 MB each.
+- **Apps hub** (`/apps`) and eight apps, each with an autopilot where the brain decides:
+  - **Fly Food Critic**: dishes → sugar/bitter/salt neurons, and MN9 extends an animated proboscis and scores the dish.
+  - **Smell-o-vision**: odour fingerprints in 20 ms sniffs, plus brain-steered plume tracking (7/12 sources found vs 3/12 random).
+  - **Fly Brain Surgeon**: silence cell types to stop feeding or break the bitter veto, with a greedy auto-surgeon.
+  - **Flappy Fly**: looming → LPLC2 → giant fiber spikes → flaps (mean ~8 pipes; scrambled 0).
+  - **Twitch Plays Fly Brain**: anonymous Twitch chat → stimuli, demo bots, OBS overlay, self-directed autopilot.
+  - **Fly Brain Radio**: spikes → Web Audio notes, 5 stations, fly-DJ autopilot, recording.
+  - **Is It Really the Fly?**: real wiring vs scrambled targets vs shuffled strengths, with a graded battery.
+  - **Fly Gangs**: mutant brains compete at feast, poison and dodge, and the winners breed.
+- **Scrambled wiring** switch in most apps, and a shuffled-weights control in the simulator.
+- Live mode for the WebGL brain (`LiveSource`), so any simulation can light up the 3D map.
+- **SEO**: per-page titles, descriptions, keywords and canonicals; Open Graph and Twitter cards with rendered 1200×630 images (`scripts/make_og.py`); WebApplication, FAQPage, BreadcrumbList and ItemList JSON-LD; `sitemap.xml` and `robots.txt`.
+- Docs: "Apps and autopilot" page with methods and validation numbers. `scripts/validate_apps.py` for the full-brain checks.
+
 ## [0.3.0] – 2026-09-28
 
 The Next.js release: a proper home for the project.

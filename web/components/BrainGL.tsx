@@ -13,9 +13,18 @@ export const VIEWS: Record<ViewName, { yaw: number; pitch: number }> = {
 
 export type BrainHandle = { setView: (v: ViewName) => void; redraw: () => void };
 
+/** A live activity source (e.g. an in-browser simulation) instead of a recorded run. */
+export type LiveSource = {
+  fill: (act: Float32Array, touched: number[]) => number[];
+  stim?: number[]; // global indices to ring in orange
+  silence?: number[]; // global indices to cross out
+  version?: number;
+};
+
 type Props = {
   geo: Geometry | null;
   run: Run | null;
+  live?: LiveSource | null;
   clock: Clock;
   mode: "replay" | "mean";
   selected?: number;
@@ -142,7 +151,9 @@ const BrainGL = forwardRef<BrainHandle, Props>(function BrainGL(props, ref) {
     const s = S.current, gl = s.gl, pr = P.current;
     if (!gl || !s.prog || !s.pos) return;
     // activity
-    if (pr.run && s.act) {
+    if (pr.live && s.act) {
+      pr.live.fill(s.act, s.touched);
+    } else if (pr.run && s.act) {
       activityAt(pr.run, pr.clock.t, pr.mode, s.act, s.touched);
     } else if (s.act) {
       for (const i of s.touched) s.act[i] = 0;
@@ -171,8 +182,9 @@ const BrainGL = forwardRef<BrainHandle, Props>(function BrainGL(props, ref) {
     const c = ov.getContext("2d")!;
     c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
     c.clearRect(0, 0, s.W, s.H);
-    const run = pr.run;
-    if (!run || !s.pos) return;
+    if (!s.pos) return;
+    const run = pr.live ? { stim: pr.live.stim ?? [], silence: pr.live.silence ?? [] } : pr.run;
+    if (!run) return;
     if (run.stim.length <= 400) {
       c.strokeStyle = "rgba(255,150,90,.85)";
       c.lineWidth = 1;
@@ -200,11 +212,12 @@ const BrainGL = forwardRef<BrainHandle, Props>(function BrainGL(props, ref) {
 
   const pick = (clientX: number, clientY: number) => {
     const s = S.current, run = P.current.run, wrap = wrapRef.current;
-    if (!run || !s.pos || !wrap) return -1;
+    if ((!run && !P.current.live) || !s.pos || !wrap) return -1;
     const r = wrap.getBoundingClientRect(), mx = clientX - r.left, my = clientY - r.top;
     let best = -1, bd = 14 * 14;
-    for (let k = 0; k < run.rateI.length; k++) {
-      const i = run.rateI[k];
+    const cand: ArrayLike<number> = P.current.live ? s.touched.slice() : run!.rateI;
+    for (let k = 0; k < cand.length; k++) {
+      const i = cand[k];
       const [x, y] = project(i), d = (x - mx) ** 2 + (y - my) ** 2;
       if (d < bd) { bd = d; best = i; }
     }
@@ -245,7 +258,8 @@ const BrainGL = forwardRef<BrainHandle, Props>(function BrainGL(props, ref) {
       if (!onScreen || document.hidden) return;
       const pr = P.current;
       if (pr.autoRotate && !dragging.current) { s.yaw += 0.0012; s.dirty = true; }
-      if (pr.run && pr.clock.t !== s.lastT) { s.lastT = pr.clock.t; s.dirty = true; }
+      if (pr.live) s.dirty = true;
+      else if (pr.run && pr.clock.t !== s.lastT) { s.lastT = pr.clock.t; s.dirty = true; }
       if (s.dirty) { s.dirty = false; draw(); }
     };
     s.raf = requestAnimationFrame(loop);
@@ -277,7 +291,7 @@ const BrainGL = forwardRef<BrainHandle, Props>(function BrainGL(props, ref) {
     s.dirty = true;
   }, [props.geo]);
 
-  useEffect(() => { S.current.dirty = true; }, [props.run, props.mode, props.selected]);
+  useEffect(() => { S.current.dirty = true; }, [props.run, props.mode, props.selected, props.live]);
 
   // resize
   useEffect(() => {

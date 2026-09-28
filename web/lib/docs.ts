@@ -13,6 +13,7 @@ export const DOCS: DocPage[] = [
   { slug: "getting-started", title: "Install and run", group: "Start here", file: c("getting-started.md") },
   { slug: "lab", title: "Using the lab", group: "Start here", file: c("lab.md") },
   { slug: "command-center", title: "Command center", group: "Start here", file: c("command-center.md") },
+  { slug: "apps", title: "Apps and autopilot", group: "Start here", file: c("apps.md") },
   { slug: "how-it-works", title: "How the model works", group: "Science", file: c("how-it-works.md") },
   { slug: "experiments", title: "Recorded experiments", group: "Science", file: c("experiments.md") },
   { slug: "presets", title: "Presets and cell types", group: "Science", file: c("presets.md") },

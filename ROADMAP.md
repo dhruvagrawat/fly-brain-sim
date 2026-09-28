@@ -12,6 +12,8 @@ Where Flybrain is heading. I keep this file current: when something ships it mov
 - **Experiment log and comparison.**
 - **Docs site, changelog, lab notebook.**
 - **Vercel deployment** of the static site.
+- **Eight apps with autopilot**, running circuit packs live in the browser: Food Critic, Smell-o-vision, Brain Surgeon, Flappy Fly, Twitch Plays, Brain Radio, Is It Really the Fly?, Fly Gangs.
+- **Real vs scrambled controls** built into the apps.
 
 ## 🔨 Building: a virtual body
 
@@ -41,6 +43,10 @@ The fly learns through dopamine in the mushroom body. The plan:
 
 - **Automated silencing screens.** For a stimulus and a readout neuron, silence every candidate cell type and rank them by effect. This is the experiment in the lab notebook, done at scale.
 - **Path finder.** The strongest connection paths from stimulus to readout, overlaid on the brain.
+
+## ⏭ Next: better smell
+
+The olfactory system over-excites in this model after ~20 ms. The plan: add per-cell-type thresholds and APL/LN inhibition fitted to published odour responses, then let Smell-o-vision use continuous odour instead of sniffs.
 
 ## 🔭 Exploring
 

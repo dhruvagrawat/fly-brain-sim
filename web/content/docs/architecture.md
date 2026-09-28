@@ -11,11 +11,14 @@ fly-brain-sim/
 │   ├── cli.py                python -m flybrain …
 │   └── web/app.html          fallback single-page lab (no build needed)
 ├── scripts/
-│   └── export_web_data.py    run recorded experiments → web/public/data/
+│   ├── export_web_data.py    run recorded experiments → web/public/data/
+│   ├── build_circuits.py     extract + validate app circuit packs → web/public/data/circuits/
+│   ├── validate_apps.py      full-brain checks behind the apps
+│   └── make_og.py            render social preview images → web/public/og/
 ├── web/                      Next.js site (landing, lab, docs)
-│   ├── app/                  routes: /, /lab, /docs/[slug]
+│   ├── app/                  routes: /, /apps/*, /lab, /docs/[slug], sitemap, robots
 │   ├── components/           BrainGL (WebGL), lab/, home/ explainers
-│   ├── lib/                  data decoding, command parser, playback clock
+│   ├── lib/                  data decoding, in-browser simulator (sim.ts), command parser, clock
 │   ├── content/docs/         these docs, as Markdown
 │   └── public/data/          geometry + recorded runs (static JSON)
 ├── CHANGELOG.md  ROADMAP.md  NOTEBOOK.md    project tracking (rendered in the docs)

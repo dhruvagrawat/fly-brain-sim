@@ -7,6 +7,7 @@ import CascadeDemo from "@/components/home/CascadeDemo";
 import CommandDemo from "@/components/home/CommandDemo";
 import { CountUp, LiveWhenVisible, Reveal } from "@/components/home/Reveal";
 import type { RunSummary } from "@/lib/data";
+import { APPS } from "@/lib/apps";
 
 type Indexed = RunSummary & { spark: number[] };
 
@@ -156,6 +157,27 @@ v > −45 mV  →  spike, v ← −52 mV`}</pre>
         </div>
       </section>
 
+      {/* ---------------- apps ---------------- */}
+      <section className="section container" id="apps">
+        <Reveal className="section-head">
+          <p className="eyebrow">Apps</p>
+          <h2 className="section-title">Hand the fly the controls</h2>
+          <p className="section-lead">Eight apps where a real slice of the connectome runs live in your browser and the fly’s own neurons make the decisions. Flip on autopilot and watch it eat, sniff, dodge, DJ and evolve.</p>
+        </Reveal>
+        <div className="hub-grid">
+          {APPS.map((a, i) => (
+            <Reveal key={a.slug} delay={(i % 4) * 60}>
+              <Link href={`/apps/${a.slug}/`} className="hub-card">
+                <h3 style={{ margin: 0, font: "700 19px/1.2 var(--display)" }}>{a.name}</h3>
+                <p>{a.tagline}</p>
+                <span className="exp-go">Open →</span>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+        <div className="center"><Link href="/apps/" className="btn big solid">All apps →</Link></div>
+      </section>
+
       {/* ---------------- command center ---------------- */}
       <section className="section container split" id="commands">
         <Reveal className="split-text">
@@ -200,7 +222,7 @@ v > −45 mV  →  spike, v ← −52 mV`}</pre>
         <div className="road">
           {ROADMAP.map((r, i) => (
             <Reveal key={r.title} className="road-item" delay={(i % 3) * 70}>
-              <span className={`status status-${r.status.toLowerCase()}`}>{r.status}</span>
+              <span className={`rstatus rstatus-${r.status.toLowerCase()}`}>{r.status}</span>
               <h3>{r.title}</h3>
               <p>{r.text}</p>
             </Reveal>

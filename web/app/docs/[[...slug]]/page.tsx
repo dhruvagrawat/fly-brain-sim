@@ -12,7 +12,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug } = await params;
   const doc = getDoc(slug?.[0] ?? "");
-  return { title: doc ? `${doc.page.title} · Docs` : "Docs", description: doc?.description };
+  const s = slug?.[0] ?? "";
+  return { title: doc ? `${doc.page.title} · Docs` : "Docs", description: doc?.description, alternates: { canonical: `/docs/${s ? s + "/" : ""}` }, openGraph: { images: [{ url: "/og/docs.png", width: 1200, height: 630 }] } };
 }
 
 export default async function DocsPage({ params }: { params: Promise<{ slug?: string[] }> }) {

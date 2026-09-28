@@ -10,8 +10,13 @@ import "@fontsource/chivo-mono/500.css";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/apps";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
+  keywords: ["fly brain simulation", "fruit fly connectome", "FlyWire", "drosophila brain", "brain simulation online", "connectome games", "neuroscience"],
+  twitter: { card: "summary_large_image", images: ["/og/home.png"] },
   title: { default: "Flybrain · a whole fruit fly brain, simulated", template: "%s · Flybrain" },
   description:
     "Stimulate any neuron in the adult fruit fly brain and watch the signal spread through all 138,639 neurons of the FlyWire connectome. Built by Dhruv Agrawat.",
@@ -20,6 +25,8 @@ export const metadata: Metadata = {
     title: "Flybrain",
     description: "A whole fruit fly brain, simulated neuron by neuron. 138,639 neurons, 15 million connections.",
     type: "website",
+    siteName: "Flybrain",
+    images: [{ url: "/og/home.png", width: 1200, height: 630, alt: "Flybrain: a whole fruit fly brain, simulated" }],
   },
 };
 
@@ -59,6 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div>
               <h4>Explore</h4>
               <ul>
+                <li><Link href="/apps/">Apps</Link></li>
                 <li><Link href="/lab/">Lab</Link></li>
                 <li><Link href="/docs/">Documentation</Link></li>
                 <li><Link href="/docs/roadmap/">Roadmap</Link></li>
